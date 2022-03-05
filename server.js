@@ -114,7 +114,7 @@ app.get("/api/shorturl/:index", (req, res) => {
   if (isMatch) {
     res.redirect(url);
   } else {
-    res.send("Not Found!!!");
+    res.json({ error: "No short URL found for the given input" });
   }
 });
 
