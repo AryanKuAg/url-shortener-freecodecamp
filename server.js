@@ -24,7 +24,7 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: "hello API" });
 });
 
-app.post("/", urlencodedParser, function (req, res) {
+app.post("/api/shorturl", urlencodedParser, function (req, res) {
   let formData = req.body.url;
   formData = formData.toLowerCase();
   isThere = false;
@@ -44,29 +44,29 @@ app.post("/", urlencodedParser, function (req, res) {
       myUrl = i;
     }
   }
-  // res.json({ original_url: formData, shortUrl: myUrl });
-  res.redirect("api/shorturl/?formdata=" + formData);
+  res.json({ original_url: formData, shortUrl: myUrl });
+  // res.redirect("api/shorturl/?formdata=" + formData);
   // console.log("post", req.body.url);
 });
 
-app.get("/api/shorturl", function (req, res) {
-  mydata = req.query.formdata;
-  original_url = "";
-  su = "";
-  isFound = false;
-  for (let i in shortUrl) {
-    if (shortUrl[i] === mydata) {
-      original_url = shortUrl[i];
-      su = i;
-      isFound = true;
-    }
-  }
-  if (isFound) {
-    res.json({ original_url: original_url, shortUrl: su });
-  } else {
-    res.send("Nothing found");
-  }
-});
+// app.get("/api/shorturl", function (req, res) {
+//   mydata = req.query.formdata;
+//   original_url = "";
+//   su = "";
+//   isFound = false;
+//   for (let i in shortUrl) {
+//     if (shortUrl[i] === mydata) {
+//       original_url = shortUrl[i];
+//       su = i;
+//       isFound = true;
+//     }
+//   }
+//   if (isFound) {
+//     res.json({ original_url: original_url, shortUrl: su });
+//   } else {
+//     res.send("Nothing found");
+//   }
+// });
 
 app.listen(port, function () {
   console.log(`Listening on port ${port}`);
