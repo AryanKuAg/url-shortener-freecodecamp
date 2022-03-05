@@ -6,10 +6,7 @@ const app = express();
 var bodyParser = require("body-parser");
 const Validator = require("validator");
 
-const shortUrl = {
-  1: "https://www.freecodecamp.org",
-  0: "https://www.google.com",
-};
+const shortUrl = {};
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
@@ -30,7 +27,21 @@ app.get("/api/hello", function (req, res) {
 
 app.post("/api/shorturl", urlencodedParser, function (req, res) {
   let formData = req.body.url;
-  let isCorrect = Validator.isURL(formData);
+  // let isCorrect = Validator.isURL(formData);
+  let isCorrect =
+    formData.includes("http") &&
+    formData.includes(".") &&
+    formData.includes("/");
+  // console.log(formData.toString());
+  // dns.lookup(formData.toString(), (err, value) => {
+  //   if (!err) {
+  //     console.log(value);
+  //   } else {
+  //     console.log("error");
+  //   }
+  // });
+  // console.log("df", formData);
+  // console.log("iscorrect", isCorrect.callback());
 
   // dns.lookup(formData, function (err, address, family) {
   //   console.log("err", err);
@@ -104,6 +115,10 @@ app.get("/api/shorturl/:index", (req, res) => {
   } else {
     res.send("Not Found!!!");
   }
+});
+
+app.get("*", (req, res) => {
+  res.send("Not Found");
 });
 
 app.listen(port, function () {
