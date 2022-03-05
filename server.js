@@ -6,7 +6,10 @@ const app = express();
 var bodyParser = require("body-parser");
 const Validator = require("validator");
 
-const shortUrl = {};
+const shortUrl = {
+  0: "https://www.google.com",
+  1: "https://freeCodeCamp.org",
+};
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
