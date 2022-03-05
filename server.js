@@ -27,6 +27,7 @@ app.get("/api/hello", function (req, res) {
 
 app.post("/api/shorturl", urlencodedParser, function (req, res) {
   let formData = req.body.url;
+  formData = formData.trim();
   // let isCorrect = Validator.isURL(formData);
   let isCorrect =
     formData.includes("http") &&
