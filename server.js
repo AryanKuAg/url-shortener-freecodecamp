@@ -4,6 +4,7 @@ const cors = require("cors");
 const dns = require("dns");
 const app = express();
 var bodyParser = require("body-parser");
+const Validator = require("validator");
 
 const shortUrl = {};
 
@@ -26,27 +27,38 @@ app.get("/api/hello", function (req, res) {
 
 app.post("/api/shorturl", urlencodedParser, function (req, res) {
   let formData = req.body.url;
-  formData = formData.toLowerCase();
-  isThere = false;
-  for (let i in shortUrl) {
-    if (shortUrl[i] === formData) {
-      isThere = true;
-    }
-  }
-  if (!isThere) {
-    // url does not exist
-    shortUrl[Object.keys(shortUrl).length] = formData;
-  }
+  let isCorrect = Validator.isURL(formData);
 
-  myUrl = 0;
-  for (let i in shortUrl) {
-    if (shortUrl[i] === formData) {
-      myUrl = i;
+  // dns.lookup(formData, function (err, address, family) {
+  //   console.log("err", err);
+  //   console.log("address", address);
+  //   console.log("family", family);
+  // });
+  if (!isCorrect) {
+    res.json({ error: "invalid url" });
+  } else {
+    formData = formData.toLowerCase();
+    isThere = false;
+    for (let i in shortUrl) {
+      if (shortUrl[i] === formData) {
+        isThere = true;
+      }
     }
+    if (!isThere) {
+      // url does not exist
+      shortUrl[Object.keys(shortUrl).length] = formData;
+    }
+
+    myUrl = 0;
+    for (let i in shortUrl) {
+      if (shortUrl[i] === formData) {
+        myUrl = i;
+      }
+    }
+    res.json({ original_url: formData, shortUrl: myUrl });
+    // res.redirect("api/shorturl/?formdata=" + formData);
+    // console.log("post", req.body.url);
   }
-  res.json({ original_url: formData, shortUrl: myUrl });
-  // res.redirect("api/shorturl/?formdata=" + formData);
-  // console.log("post", req.body.url);
 });
 
 // app.get("/api/shorturl", function (req, res) {
@@ -67,6 +79,29 @@ app.post("/api/shorturl", urlencodedParser, function (req, res) {
 //     res.send("Nothing found");
 //   }
 // });
+
+app.get("/api/shorturl/:index", (req, res) => {
+  let index = req.params.index;
+
+  isMatch = false;
+  url = "";
+  for (let i in shortUrl) {
+    // console.log("key", typeof i);
+    // console.log("value", shortUrl[i]);
+    // console.log("index", typeof index);
+    // console.log("--------------------");
+    if (index === i) {
+      // console.log("match");
+      isMatch = true;
+      url = shortUrl[i];
+    }
+  }
+  if (isMatch) {
+    res.redirect(url);
+  } else {
+    res.send("Not Found!!!");
+  }
+});
 
 app.listen(port, function () {
   console.log(`Listening on port ${port}`);
