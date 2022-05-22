@@ -35,10 +35,7 @@ app.post("/api/shorturl", function (req, res) {
 
  
   let isCorrect = validator.isURL(formData);
-  // let isCorrect =
-  //   formData.includes("http") &&
-  //   formData.includes(".") &&
-  //   formData.includes("/");
+ 
  
   if (!isCorrect) {
     res.json({ error: "invalid url" });
