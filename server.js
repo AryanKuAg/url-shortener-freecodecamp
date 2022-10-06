@@ -4,15 +4,18 @@ const cors = require("cors");
 const dns = require("dns");
 const app = express();
 const validator = require("validator");
-const mongoose = require('mongoose');
-mongoose.connect('mongodb+srv://admin:admin@cluster0.l3ja2io.mongodb.net/?retryWrites=true&w=majority');
+const mongoose = require("mongoose");
+const internal = require("stream");
+mongoose.connect(
+  "mongodb+srv://admin:admin@cluster0.l3ja2io.mongodb.net/?retryWrites=true&w=majority"
+);
 
-const Url = mongoose.model('Url', { original_url: String ,short_url: Number});
+const Url = mongoose.model("Url", { original_url: String, short_url: Number });
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
 app.use(express.urlencoded());
-app.use(express.json())
+app.use(express.json());
 
 app.use(cors());
 
@@ -27,12 +30,12 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: "hello API" });
 });
 
-app.post("/api/shorturl",async function (req, res) {
+app.post("/api/shorturl", async function (req, res) {
   let formData = req.body.url;
   formData = formData.trim();
 
-  let isCorrect = validator.isURL(formData); 
- 
+  let isCorrect = validator.isURL(formData);
+
   if (!isCorrect) {
     res.json({ error: "invalid url" });
   } else {
@@ -40,33 +43,33 @@ app.post("/api/shorturl",async function (req, res) {
     // 1) Store exact data in mongodb
     // 2) Send saved response
     formData = formData.toLowerCase();
-    const totalDocsInUrlCollection = await Url.countDocuments()
-    const webUrl = new Url({ original_url: formData ,short_url: totalDocsInUrlCollection });
+    const totalDocsInUrlCollection = await Url.countDocuments();
+    const webUrl = new Url({
+      original_url: formData,
+      short_url: totalDocsInUrlCollection,
+    });
     const savedData = await webUrl.save();
-    
-   res.json({original_url: savedData["original_url"], short_url: savedData["short_url"]})
+
+    res.json({
+      original_url: savedData["original_url"],
+      short_url: savedData["short_url"],
+    });
   }
 });
 
-app.get("/api/shorturl/:index", (req, res) => {
-  // let index = req.params.index;
+app.get("/api/shorturl/:index", async (req, res) => {
+  try {
+    let index = req.params.index;
+    const data = await Url.findOne({ short_url: parseInt(index) });
 
-  // isMatch = false;
-  // url = "";
-  // for (let i in shortUrl) {
-    
-  //   if (index === i) {
-  //     // console.log("match");
-  //     isMatch = true;
-  //     url = shortUrl[i];
-  //   }
-  // }
-  // if (isMatch) {
-  //   res.redirect(url);
-  // } else {
-  //   res.json({ error: "No short URL found for the given input" });
-  // }
-  res.send('hi')
+    if (data) {
+      res.redirect(data["original_url"]);
+    } else {
+      res.json({ error: "No short URL found for the given input" });
+    }
+  } catch (e) {
+    res.json({ error: "No short URL found for the given input" });
+  }
 });
 
 app.get("*", (req, res) => {
