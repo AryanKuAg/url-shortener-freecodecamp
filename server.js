@@ -4,11 +4,10 @@ const cors = require("cors");
 const dns = require("dns");
 const app = express();
 const validator = require("validator");
+const mongoose = require('mongoose');
+mongoose.connect('mongodb+srv://admin:admin@cluster0.l3ja2io.mongodb.net/?retryWrites=true&w=majority');
 
-const shortUrl = {
-  0: "https://www.google.com",
-  1: "https://freeCodeCamp.org",
-};
+const Url = mongoose.model('Url', { original_url: String ,short_url: Number});
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
@@ -28,59 +27,46 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: "hello API" });
 });
 
-app.post("/api/shorturl", function (req, res) {
+app.post("/api/shorturl",async function (req, res) {
   let formData = req.body.url;
   formData = formData.trim();
-  // console.log(validator.isURL(formData));
 
- 
-  let isCorrect = validator.isURL(formData);
- 
+  let isCorrect = validator.isURL(formData); 
  
   if (!isCorrect) {
     res.json({ error: "invalid url" });
   } else {
+    // steps
+    // 1) Store exact data in mongodb
+    // 2) Send saved response
     formData = formData.toLowerCase();
-    let isThere = false;
-    for (let i in shortUrl) {
-      if (shortUrl[i] === formData) {
-        isThere = true;
-      }
-    }
-    if (!isThere) {
-      // url does not exist
-      shortUrl[Object.keys(shortUrl).length] = formData;
-    }}
-
-  //   myUrl = 0;
-  //   for (let i in shortUrl) {
-  //     if (shortUrl[i] === formData) {
-  //       myUrl = i;
-  //     }
-  //   }
-  //   res.json({ original_url: formData, shortUrl: myUrl });
-
- res.json({pupu:'papa'})
+    const totalDocsInUrlCollection = await Url.countDocuments()
+    const webUrl = new Url({ original_url: formData ,short_url: totalDocsInUrlCollection });
+    const savedData = await webUrl.save();
+    
+   res.json({original_url: savedData["original_url"], short_url: savedData["short_url"]})
+  }
 });
 
 app.get("/api/shorturl/:index", (req, res) => {
-  let index = req.params.index;
+  // let index = req.params.index;
 
-  isMatch = false;
-  url = "";
-  for (let i in shortUrl) {
+  // isMatch = false;
+  // url = "";
+  // for (let i in shortUrl) {
     
-    if (index === i) {
-      // console.log("match");
-      isMatch = true;
-      url = shortUrl[i];
-    }
-  }
-  if (isMatch) {
-    res.redirect(url);
-  } else {
-    res.json({ error: "No short URL found for the given input" });
-  }
+  //   if (index === i) {
+  //     // console.log("match");
+  //     isMatch = true;
+  //     url = shortUrl[i];
+  //   }
+  // }
+  // if (isMatch) {
+  //   res.redirect(url);
+  // } else {
+  //   res.json({ error: "No short URL found for the given input" });
+  // }
+  res.send('hi')
 });
 
 app.get("*", (req, res) => {
